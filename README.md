@@ -3,7 +3,7 @@ This is an initial alpha release of the SparkMod framework, there is already a l
 There is a lot of cool functionality available so it will take a while to document it all. Keep an eye on this page, the wiki and the API docs.
 
 ## Installing SparkMod
-SparkMod can be added to your server either by using the workshop mod id or by adding the line `Script.Load("lua/SparkMod/server.lua")` directly into the top of your Server.lua file (before the line `Script.Load("lua/Shared.lua")`). Note that all client-side modding capabilities will be unavailable unless you use the workshop mod id as that is the only way for clients to load mods.
+SparkMod can be added to your server either by using the [Steam Workshop Mod ID](http://steamcommunity.com/sharedfiles/filedetails/?id=142276371) (87af713) or manually, by adding the line `Script.Load("lua/SparkMod/server.lua")` directly into the top of your Server.lua file (before the line `Script.Load("lua/Shared.lua")`). Note that all client-side modding capabilities will be unavailable unless you use the workshop mod id as that is the only way for clients to load mods.
 
 ## Server Admins
 SparkMod provides many useful features for server admins, a few base server plugins are included with the framework and more will be added in the near future.
