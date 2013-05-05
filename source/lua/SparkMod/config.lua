@@ -286,6 +286,29 @@ function SparkMod.IsClientInGroup(client, group_name)
     end
 end
 
+-- Persistent storage
+SparkMod.store = SparkMod.store or { }
+
+function SparkMod.SavePersistentStore()    
+    local file = io.open("config://sparkmod/data/storage.json", "w+")
+    if file then    
+        file:write(json.encode(SparkMod.store))
+        file:close()
+        return true
+    else
+        Puts("[SM] Error: Unable to save persistent storage, cannot write to sparkmod/data/storage.json")
+    end
+
+    return false
+end
+
+function SparkMod.LoadPersistentStore()
+    local store = LoadConfigFile("sparkmod/data/storage.json")
+    if store then
+        SparkMod.store = store
+    end
+end
+
 -- Cookies
 SparkMod.cookies = SparkMod.cookies or { }
 SparkMod.cookies_version = 0
@@ -296,14 +319,16 @@ function SparkMod.SaveCookies()
     local file = io.open("config://sparkmod/data/cookies.json", "w+")
     if file then    
         file:write(json.encode(SparkMod.cookies))
-        io.close(file)
+        file:close()
 
         file = io.open("config://sparkmod/data/cookies.version", "w+")    
         if file then
             file:write(SparkMod.cookies_version)
-            io.close(file)
+            file:close()
             
             return true
+        else
+            Puts("[SM] Error: Unable to save cookies, cannot write to sparkmod/data/cookies.json")
         end
     end
 
@@ -317,7 +342,7 @@ local function GetCookiesVersion()
     local file = io.open(file_path, "r")
     if file then
         local raw_version = file:read("*all")
-        io.close(file)
+        file:close()
         return tonumber(raw_version)
     end
 

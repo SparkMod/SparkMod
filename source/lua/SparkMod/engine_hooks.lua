@@ -27,3 +27,13 @@ if Server or Client then
     end
     
 end
+
+if Server then
+
+    local StartWorld = Server.StartWorld
+    function Server.StartWorld(mods, map_name)
+        SparkMod.On("MapEnd", map_name, mods)
+        StartWorld(mods, map_name)
+    end
+
+end

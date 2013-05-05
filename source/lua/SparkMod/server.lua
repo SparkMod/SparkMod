@@ -21,9 +21,9 @@ function SparkMod.IsClientEnabled(client)
 end
 
 -- Events
-function SparkMod.OnChangeMap(map_name)
+function SparkMod.OnMapEnd(map_name)
+    Plugin.UnloadAll()
     SparkMod.is_map_loaded = false
-    return SparkMod.On("OnMapEnd")
 end
 
 function SparkMod.OnClientConnect(client)
@@ -100,3 +100,4 @@ function SparkMod.OnError(error, plugin_name, event_name, is_unloading)
 end
 
 SparkMod.LoadConfig()
+SparkMod.LoadPersistentStore()

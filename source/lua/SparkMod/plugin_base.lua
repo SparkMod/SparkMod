@@ -31,12 +31,72 @@ GetTime = Shared.GetTime
 -- @treturn number the current system timestamp in seconds
 GetSystemTime = Shared.GetSystemTime()
 
-function Store(name, tbl)
-    Plugin.stored_data[name] = table.dup(tbl)
+--- Declares variables that will persist between map changes, plugin reloads and server restarts.
+-- Persistent variables are saved to a file when the plugin is unloaded or if Store() is called.
+-- @usage Persistent {
+--    recent_map = { }
+--}
+function Persistent(tbl)
+    local plugin_store = SparkMod.store[plugin_name]
+
+    SparkMod.store[plugin_name] = SparkMod.store[plugin_name] or { }
+    
+    persistent_variables = { }
+
+    for name, default_value in pairs(tbl) do
+        persistent_variables[name] = true
+        self[name] = plugin_store and plugin_store[name] and table.dup(plugin_store[name]) or default_value
+    end
 end
 
-function Restore(name, default)
-    return Plugin.stored_data[name] or default
+--- Saves persistent variables to storage
+-- @string[opt] name a variables name if you only want to save a single persistent variable
+function Store(name)
+    local plugin_store = SparkMod.store[plugin_name]
+
+    if name then
+        if not persistent_variables or not persistent_variables[name] then
+            error("Unable to store variables which have not been defined as persistent")
+        end
+
+        plugin_store[name] = table.dup(self[name])
+    else
+        if not persistent_variables then
+            return false
+        end
+
+        for name, _ in pairs(persistent_variables) do
+            plugin_store[name] = table.dup(self[name])
+        end
+    end
+
+    SparkMod.SavePersistentStore()
+
+    return true
+end
+
+--- Restores persistent variables from storage
+-- @string[opt] name a variables name if you only want to restore a single persistent variable
+function Restore(name)
+    local plugin_store = SparkMod.store[plugin_name]
+
+    if name then
+        if not persistent_variables or not persistent_variables[name] then
+            error("Unable to restore variables which have not been defined as persistent")
+        end
+
+        self[name] = table.dup(plugin_store[name])
+    else
+        if not persistent_variables then
+            return false
+        end
+
+        for name, _ in pairs(persistent_variables) do
+            self[name] = table.dup(plugin_store[name])
+        end
+    end
+
+    return true
 end
 
 function CatchErrors(func)

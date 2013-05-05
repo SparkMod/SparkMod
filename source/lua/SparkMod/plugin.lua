@@ -27,8 +27,7 @@ Plugin = {
     network_message_hooked = { },
     client_commands = { },
     admin_commands = { },
-    registered_forwards = { },
-    stored_data = { }
+    registered_forwards = { }
 }
 
 setmetatable(Plugin, {
@@ -42,6 +41,7 @@ Plugin.base = {
     hooked_function_callbacks = { },
     network_message_value_callbacks = { },
     network_message_hooks = { },
+    persistent_variables = { },
     client_commands = { },
     admin_commands = { },
     command_aliases = { },
@@ -454,6 +454,8 @@ function Plugin.Unload(plugin_name, skip_unload_forwards)
             end
         end
     end
+
+    plugin.Store()
 
     if plugin._library_name then
         _G[plugin._library_name] = nil

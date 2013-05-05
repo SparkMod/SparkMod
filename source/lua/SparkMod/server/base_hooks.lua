@@ -101,12 +101,12 @@ SparkMod._HookFunction("Server.AddChatToHistory", "ChatMessage",
     end
 )
 
-SparkMod._HookFunction("MapCycle_ChangeMap", "ChangeMap")
-
 SparkMod._HookFunction("SetGamerules")
 
 -- Events
 function SparkMod.OnSetGamerules(gamerules)
+    if not gamerules then return end
+    
     SparkMod.gamerules = gamerules
 
     local previous_gamerules_class_name = SparkMod.gamerules_class_name
