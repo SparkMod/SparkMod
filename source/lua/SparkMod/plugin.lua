@@ -657,7 +657,7 @@ end
 
 -- Hooks an engine event and fires a forward for each plugin
 function Plugin.HookEvent(event_name)
-	Event.Hook(event_name, function(...) Plugin.On(event_name, ...) end)
+    Event.Hook(event_name, function(...) Plugin.On(event_name, ...) end)
 end
 
 function Plugin.HookNetworkMessage(message_name)
