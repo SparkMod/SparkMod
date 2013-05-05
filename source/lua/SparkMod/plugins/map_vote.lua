@@ -25,7 +25,7 @@ default_config = {
 
 default_phrases = {
     ["Start Countdown"] = "%.1f seconds remaining until the game begins...",
-    ["Already Started"] = "There is a map vote already running.",
+    ["Already Started"] = "There is already a map vote running.",
     ["Not Started"]     = "There is currently no map vote running.",
     ["Too Few Maps"]    = "*** Not enough maps in rotation for a vote.",
     ["Starting"]        = "*** Map voting will begin in %s seconds...",
@@ -146,7 +146,7 @@ local function CountMapVotes(map_name)
 end
 
 local function DisplayVoteStatus()
-    PrintToChatAll("%t", "Time Left", config.vote_duration - (Now() - started_at))
+    PrintToChatAll("%t", "Time Left", config.vote_duration - (GetTime() - started_at))
 
     for i, map_name in ipairs(vote_maps) do
         PrintToChatAll("%t", "Current Votes", CountMapVotes(map_name), map_name, i)
@@ -203,7 +203,7 @@ end
 function OnVoteStarted()
     starting = false
     started = true
-    started_at = Now()
+    started_at = GetTime()
 
     PrintToChatAll("%t", "Started")
 
