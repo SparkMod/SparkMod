@@ -33,9 +33,10 @@ GetSystemTime = Shared.GetSystemTime()
 
 --- Declares variables that will persist between map changes, plugin reloads and server restarts.
 -- Persistent variables are saved to a file when the plugin is unloaded or if Store() is called.
+-- @tab tbl a table containing all variables you want to persist
 -- @usage Persistent {
---    recent_map = { }
---}
+--     recent_map = { }
+-- }
 function Persistent(tbl)
     local plugin_store = SparkMod.store[plugin_name]
 
