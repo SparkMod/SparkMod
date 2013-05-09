@@ -126,6 +126,8 @@ function SparkMod.NetworkMessage(message_name, func)
     func()
 end
 
+if not SparkMod.is_using_workshop then return end
+
 -- Core network messages
 kMaxConfigValueLength = 256
 
