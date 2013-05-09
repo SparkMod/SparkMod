@@ -122,6 +122,10 @@ function SparkMod.Command_Plugins_List()
 end
 
 function SparkMod.Command_Plugins_Load(plugin_name)
+    if not plugin_name then
+        SendError "[SM] You need to give a plugin name that you would like to load"
+    end
+    
     if Plugin.Load(plugin_name) then
         SendReply("[SM] Loaded plugin successfully: %s", plugin_name)
     else
@@ -135,7 +139,7 @@ function SparkMod.Command_Plugins_Refresh(plugin_name)
     local loaded = 0
     
     for i = 1, #SparkMod.config.plugins do
-        if Plugin.Load(SparkMod.config.plugins[i]) then
+        if Plugin.Load(SparkMod.config.plugins[i]) then --TODO: change to new loading logic
             loaded = loaded + 1
         else
             SendReply("[SM] Plugin failed to load: %s", SparkMod.config.plugins[i])
@@ -148,6 +152,10 @@ function SparkMod.Command_Plugins_Refresh(plugin_name)
 end
 
 function SparkMod.Command_Plugins_Reload(plugin_name)
+    if not plugin_name then
+        SendError "[SM] You need to give a plugin name that you would like to reload"
+    end
+
     if Plugin.Reload(plugin_name) then
         SendReply("[SM] Reloaded plugin successfully: %s", plugin_name)
     else
@@ -156,6 +164,10 @@ function SparkMod.Command_Plugins_Reload(plugin_name)
 end
 
 function SparkMod.Command_Plugins_Unload(plugin_name)
+    if not plugin_name then
+        SendError "[SM] You need to give a plugin name that you would like to unload"
+    end
+    
     if Plugin.Unload(plugin_name) then
         SendReply("[SM] Unloaded plugin successfully: %s", plugin_name)
     else
@@ -163,7 +175,7 @@ function SparkMod.Command_Plugins_Unload(plugin_name)
     end
 end
 
-function SparkMod.Command_Plugins_UnloadAll(plugin_name)
+function SparkMod.Command_Plugins_UnloadAll()
     Plugin.UnloadAll()    
     SendReply("[SM] Unloaded all plugins")
 end
