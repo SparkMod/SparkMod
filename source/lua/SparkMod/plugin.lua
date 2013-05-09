@@ -170,8 +170,10 @@ end
 
 function Plugin.IsSingleFile(plugin_name)
     local plugin_pattern = "^" .. plugin_name .. "[/%.]"
-    return SparkMod.Any(SparkMod.FindMatchingFiles("lua/SparkMod/plugins/*"), function(_, path)
-        local plugin_subpath = path:sub(22)
+    local config_plugin_paths = SparkMod.FindMatchingFiles("config://sparkmod/plugins/*")
+    local plugin_paths = table.imerged(SparkMod.FindMatchingFiles("lua/SparkMod/plugins/*"), SparkMod.FindMatchingFiles("config://sparkmod/plugins/*"))
+    return table.any(plugin_paths, function(_, path)
+        local plugin_subpath = path:match("/plugins/(.+)")
         if plugin_subpath:match(plugin_pattern) then
             return plugin_subpath:ends(".lua")
         end
@@ -225,7 +227,7 @@ function Plugin.LoadWithDependencies(plugin, was_requested, config_plugin_paths)
     if Plugin.IsSingleFile(plugin_name) then
         local file_path = ("%s/%s.lua"):format(plugin._plugin_base_path, plugin_name)
 
-        if SparkMod.Any(config_plugin_paths, function(_, path) return path:ends("/%s.lua", plugin_name) end) then
+        if table.any(config_plugin_paths, function(_, path) return path:ends("/%s.lua", plugin_name) end) then
             -- This plugin exists in config://sparkmod/plugins/ which gets priority over other plugin locations
             if SparkMod.FileExists(file_path) then
                 Puts("[SM] Warning: Plugin \"%s.lua\" exists in multiple locations. Plugin will be loaded from sparkmod/plugins in your server config directory.", plugin_name)
@@ -243,7 +245,7 @@ function Plugin.LoadWithDependencies(plugin, was_requested, config_plugin_paths)
 
         local lua_files = SparkMod.FindMatchingFiles("%s/**/*.lua", plugin._plugin_base_path)
 
-        if SparkMod.Any(config_plugin_paths, function(_, path) return path:starts("sparkmod/plugins/%s/", plugin_name) end) then
+        if table.any(config_plugin_paths, function(_, path) return path:starts("sparkmod/plugins/%s/", plugin_name) end) then
             -- This plugin exists in config://sparkmod/plugins/ which gets priority over other plugin locations
             if #lua_files > 0 then
                 Puts("[SM] Warning: Plugin \"%s.lua\" exists in multiple locations. Plugin will be loaded from sparkmod/plugins in your server config directory.", plugin_name)
@@ -490,7 +492,7 @@ function Plugin.LoadAll()
             -- Plugin is a directory
             plugin_name = plugin_path:match "/([^/]+)/$"
             local lua_files = SparkMod.FindMatchingFiles(plugin_path .. "**/*.lua")
-            should_load_plugin = SparkMod.AnyValue(lua_files, Plugin.ShouldFileBeLoaded)
+            should_load_plugin = table.any_value(lua_files, Plugin.ShouldFileBeLoaded)
         else
             -- Plugin is a single file
             plugin_name = plugin_path:match "/([^/]+).lua$"
