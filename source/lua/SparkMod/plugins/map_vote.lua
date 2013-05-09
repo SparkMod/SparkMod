@@ -31,7 +31,6 @@ default_phrases = {
     ["Starting"]        = "*** Map voting will begin in %s seconds...",
     ["Instructions"]    = "*** You can vote for the map you want by typing vote <map>",
     ["Started"]         = "*** Map voting has started.",
-    ["Current Votes"]   = "*** %s votes for %s (type vote %d)",
     ["Map"]             = "*** %d) %s",
     ["Time Left"]       = "*** %.1f seconds are left to vote for a map",
     ["No Winner"]       = "*** Map voting has ended, no map won.",
@@ -56,13 +55,16 @@ started = false
 complete = false
 run_off = false
 
-recent_maps = { }
 vote_maps = { }
 
 last_pregame_status_at = 0
 extend_count = 0
 
 next_map = nil
+
+Persistent {
+    recent_maps = { }
+}
 
 local function FindVoteMapMatchingName(partial_name)
     local matches = { }
@@ -98,12 +100,9 @@ local function BuildVoteMaps(...)
    
     local maps = { }
     
-    local cycle_maps = { }
-
-    local cycle = MapCycle_GetMapCycle().maps
-    for _, cycle_map in ipairs(cycle) do
-        table.insert(cycle_maps, cycle_map.map)
-    end
+    local cycle_maps = table.map(MapCycle_GetMapCycle().maps, function(_, cycle_map)
+        return cycle_map.map or cycle_map
+    end)
 
     if cycle_maps and #cycle_maps > 0 then
         for _, map_name in ipairs(cycle_maps) do
@@ -149,7 +148,9 @@ local function DisplayVoteStatus()
     PrintToChatAll("%t", "Time Left", config.vote_duration - (GetTime() - started_at))
 
     for i, map_name in ipairs(vote_maps) do
-        PrintToChatAll("%t", "Current Votes", CountMapVotes(map_name), map_name, i)
+        local vote_count = CountMapVotes(map_name)
+        local format = vote_count > 0 and (vote_count > 1 and "%t (%d votes)" or "%t (%d vote)") or "%t"
+        PrintToChatAll(format, "Map", i, map_name, vote_count)
     end
 end
 
@@ -207,6 +208,7 @@ function OnVoteStarted()
 
     PrintToChatAll("%t", "Started")
 
+    DisplayVoteStatus()
     scheduler.Every(config.vote_status_interval, DisplayVoteStatus, "vote_status")
     
     scheduler.In(config.vote_duration, OnVoteEnded)
@@ -231,14 +233,14 @@ function OnVoteEnded()
     local winning_map, winning_votes = map_votes[1][1], map_votes[1][2]
 
     if not winning_map then
-        puts "No map won the vote, will use next map in cycle"
+        Puts "No map won the vote, will use next map in cycle"
         PrintToChatAll("%t", "No Winner")
         next_map = nil
         complete = true
     else
         local required_votes = total_votes * (config.run_off_percentage / 100)
         if winning_votes <= required_votes then
-            puts("Starting a runoff vote for maps: %s and %s", winning_map, map_votes[2][1])
+            Puts("Starting a runoff vote for maps: %s and %s", winning_map, map_votes[2][1])
             run_off = true
             StartVote(winning_map, map_votes[2][1])
             return
@@ -254,11 +256,11 @@ function OnVoteEnded()
     end
 
     if next_map then
-        puts("Changing to next_map: %s", next_map)
-        MapCycle_ChangeMap(next_map)
+        Puts("Changing to next_map: %s", next_map)
+        scheduler.In(config.end_of_map_vote_delay, function() MapCycle_ChangeMap(next_map) end)
     elseif not requested then
-        puts("Changing to next map in cycle")
-        MapCycle_CycleMap()
+        Puts("Changing to next map in cycle")
+        scheduler.In(config.end_of_map_vote_delay, MapCycle_CycleMap)
     end
 
     complete = false
@@ -294,14 +296,14 @@ function OnPreCanCycleMap()
         return false
     end
 
-    if GetTime() < MapCycle_GetMapCycle().time*60 + extend_count*extend_time*60 then
+    if GetTime() < MapCycle_GetMapCycle().time*60 + extend_count*config.extend_time*60 then
         return false
     end
 end
 
 -- Commands
 function OnCommandVote(client, map)
-    if not in_progress then
+    if not started then
         SendError("%t", "Not Started")
     end
 
