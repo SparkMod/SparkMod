@@ -13,6 +13,88 @@ function table.dup(tbl, depth)
     return new_table
 end
 
+function table.any(tbl, callback)
+    assert(type(callback) == "function", "Argument #2 should be a callback function")
+    for index, value in pairs(tbl) do
+        if callback(index, value) then
+            return true
+        end
+    end
+    return false
+end
+
+function table.any_value(tbl, callback_or_table)
+    local compare_type = type(callback_or_table)
+    for index, value in pairs(tbl) do
+        if compare_type == "function" then
+            if callback_or_table(value) then
+                return true
+            end
+        elseif compare_type == "table" then
+            for key, val in pairs(callback_or_table) do
+                if value[key] == val then
+                    return true
+                end
+            end
+        else
+            error "Argument #2 should be a callback function or table"
+        end
+    end
+    return false
+end
+
+function table.all(tbl, callback)
+    assert(type(callback) == "function", "Argument #2 should be a callback function")
+    for index, value in pairs(tbl) do
+        if not callback(index, value) then
+            return false
+        end
+    end    
+    return true
+end
+
+function table.none(tbl, callback)
+    assert(type(callback) == "function", "Argument #2 should be a callback function")
+    for index, value in pairs(tbl) do
+        if callback(index, value) then
+            return false
+        end
+    end    
+    return true
+end
+
+function table.all_values(tbl, callback_or_table)
+    local compare_type = type(callback_or_table)
+    for index, value in pairs(tbl) do
+        if compare_type == "function" then
+            if not callback_or_table(value) then
+                return false
+            end
+        elseif compare_type == "table" then
+            for key, val in pairs(callback_or_table) do
+                if value[key] ~= val then
+                    return false
+                end
+            end
+        else
+            error "Argument #2 should be a callback function or table"
+        end
+    end
+    return true
+end
+
+function table.any_key_matches(tbl, pattern)
+    return table.any(tbl, function(key, value)
+        return type(key) == "string" and key:match(pattern)
+    end)
+end
+
+function table.any_value_matches(tbl, pattern)
+    return table.any(tbl, function(key, value)
+        return type(value) == "string" and value:match(pattern)
+    end)
+end
+
 function table.map(tbl, callback_or_index)
     local map_type = type(callback_or_index)
     local new_table = { }

@@ -2,6 +2,8 @@
 
 SparkMod.debug_network_messages = false
 
+SparkMod.is_using_workshop = false
+
 SparkMod.is_game_loaded = false
 
 -- Called after every Script.Load call
@@ -47,6 +49,25 @@ function SparkMod.OnGameLoaded()
             elseif Client then
                 Client._HookNetworkMessage(message_name, callback)
             end
+        end
+    end
+end
+
+-- Checks if server is running SparkMod via the workshop
+function SparkMod.CheckWorkshopMods()
+    local mod_names = { }
+
+    for i = 1, Server.GetNumMods() do
+        local mod_id = Server.GetModId(i)
+        local name = Server.GetModTitle(i)
+        mod_names[mod_id] = name
+    end
+
+    for i = 1, Server.GetNumActiveMods() do
+        local mod_id = Server.GetActiveModId(i)
+        if mod_names[mod_id]:starts("SparkMod") then
+            SparkMod.is_using_workshop = true
+            break
         end
     end
 end
@@ -146,52 +167,6 @@ function SparkMod.On(event_name, ...)
     return Plugin.On(event_name, ...)
 end
 
--- Iterators
-function SparkMod.Any(tbl, callback)
-    for index, value in pairs(tbl) do
-        if callback(index, value) then
-            return true
-        end
-    end
-    return false
-end
-
-function SparkMod.AnyValue(tbl, callback)
-    for _, value in pairs(tbl) do
-        if callback(value) then
-            return true
-        end
-    end
-    return false
-end
-
-function SparkMod.All(tbl, callback)
-    for index, value in pairs(tbl) do
-        if not callback(index, value) then
-            return false
-        end
-    end
-    return true
-end
-
-function SparkMod.None(tbl, callback)
-    for index, value in pairs(tbl) do
-        if callback(index, value) then
-            return false
-        end
-    end
-    return true
-end
-
--- Iterator helpers
-function AnyKeyMatches(tbl, pattern)
-    return SparkMod.Any(tbl, function(key, value)
-        return type(key) == "string" and key:match(pattern)
-    end)
-end
-
-function AnyValueMatches(tbl, pattern)
-    return SparkMod.Any(tbl, function(key, value)
-        return type(value) == "string" and value:match(pattern)
-    end)
+if Server then
+    SparkMod.CheckWorkshopMods()
 end
