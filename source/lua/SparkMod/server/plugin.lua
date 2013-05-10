@@ -85,6 +85,8 @@ function Plugin.OnChatMessage(client, message, team_number, team_only)
     
     -- Try handle chat message as client command
     local args, arg_string = SparkMod.ParseCommandArguments(message)
+    if #args < 1 then return end
+    
     local command_name = table.remove(args, 1):lower()
 
     local has_parsed_trigger = false
