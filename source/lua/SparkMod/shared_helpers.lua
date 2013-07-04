@@ -15,8 +15,9 @@ end
 
 -- Calls a function, catches errors, returns success, ...
 function SparkMod.Call(func, ...)
+    local args = {...}
     function call_function()
-        return func(unpack(arg))
+        return func(unpack(args))
     end
     function process_error(msg)
         if msg.type == "return" then
