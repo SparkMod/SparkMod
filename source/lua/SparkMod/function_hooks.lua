@@ -31,9 +31,8 @@ end
 -- Parses defined function argument info from lua virtual machine bytecode
 -- @return argument_count, has_varargs
 local function GetFunctionArgInfo(func)
-    local b = string.dump(func)
-    local offset = ("0x%x%02x%02x%0x"):format(b:byte(16), b:byte(15), b:byte(14), b:byte(13))
-    return b:byte(tonumber(offset) + 26), b:byte(tonumber(offset) + 27) % 4 >= 2
+    dbg_info = debug.getinfo(func)
+    return dbg_info.nparams, dbg_info.isvararg
 end
 
 function SparkMod.ParseHookFunctionArgs(arg1, arg2, arg3, arg4)
