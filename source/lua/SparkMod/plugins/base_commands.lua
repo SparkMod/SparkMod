@@ -26,10 +26,10 @@ function OnCommandSet(client, name, value)
     end
 
     if value then
-        clients[client].cookie[name] = value
+        clients[client].cookies[name] = value
         SendReply("[SM] %t", "Set Attribute", name, value)
     else
-        value = clients[client].cookie[name]
+        value = clients[client].cookies[name]
         if value then
             SendReply("[SM] %t", "Attribute Value", name, value)
         else
