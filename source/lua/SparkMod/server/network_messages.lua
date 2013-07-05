@@ -62,34 +62,38 @@ end
 local netmsg_callbacks = { }
 
 -- Network message hooks
-SparkMod.HookNetworkMessage("SM_ClientError", function(client, err)
-    SparkMod.OnClientError(client, err.message, err.traceback, err.plugin_name, err.event_name, err.unloading)
-end)
+if SparkMod.is_using_workshop then
 
-SparkMod.HookNetworkMessage("SM_NetMsgExists", function(client, message)
-    local user_id = client:GetUserId()
+    SparkMod.HookNetworkMessage("SM_ClientError", function(client, err)
+        SparkMod.OnClientError(client, err.message, err.traceback, err.plugin_name, err.event_name, err.unloading)
+    end)
 
-    local info = SparkMod.clients[user_id]
-    if info then
-        info.network_message_supported = info.network_message_supported or { }
-        info.network_message_supported[message.name] = message.exists
-    end
+    SparkMod.HookNetworkMessage("SM_NetMsgExists", function(client, message)
+        local user_id = client:GetUserId()
 
-    local user_callbacks = netmsg_callbacks[user_id]
-    if not user_callbacks or not user_callbacks.exists then return end
-    
-    if user_callbacks.exists[message.name] and #user_callbacks.exists[message.name] > 0 then
-        for _, callback in ipairs(user_callbacks.exists[message.name]) do
-            local succeeded, err = SparkMod.Call(callback, message.exists)
-            if not succeeded and err.type ~= "return" then
-                plugin.Puts("Error while processing SM_NetMsgExists callback: %s", err.message)
-                plugin.Puts(err.traceback)
-                Plugin.On("Error", err, "SparkMod", "SM_NetMsgExists")
-            end
+        local info = SparkMod.clients[user_id]
+        if info then
+            info.network_message_supported = info.network_message_supported or { }
+            info.network_message_supported[message.name] = message.exists
         end
-        user_callbacks.exists[message.name] = nil
-    end
-end)
+
+        local user_callbacks = netmsg_callbacks[user_id]
+        if not user_callbacks or not user_callbacks.exists then return end
+        
+        if user_callbacks.exists[message.name] and #user_callbacks.exists[message.name] > 0 then
+            for _, callback in ipairs(user_callbacks.exists[message.name]) do
+                local succeeded, err = SparkMod.Call(callback, message.exists)
+                if not succeeded and err.type ~= "return" then
+                    plugin.Puts("Error while processing SM_NetMsgExists callback: %s", err.message)
+                    plugin.Puts(err.traceback)
+                    Plugin.On("Error", err, "SparkMod", "SM_NetMsgExists")
+                end
+            end
+            user_callbacks.exists[message.name] = nil
+        end
+    end)
+
+end
 
 -- Network message helpers
 function SparkMod.SetClientConfig(client, config_name, key, value)
