@@ -38,22 +38,18 @@ function SparkMod.Command_Plugins_Info(plugin_name)
     local plugin
     
     if plugin_name then
-        plugin_number = tonumber(plugin_name)
+        local plugin_names = Plugin.List()
+        local plugin_number = tonumber(plugin_name)
         if plugin_number then
-            local plugin_count = #SparkMod.config.plugins
+            local plugin_count = #plugin_names
             if plugin_number > plugin_count then
                 SendError("[SM] Invalid plugin number: %d", plugin_number)
             end
-            for i = 1, plugin_count do
-                if i == plugin_number then
-                    plugin_name = SparkMod.config.plugins[i]
-                    plugin = Plugin.plugins[plugin_name]
-                    break
-                end
-            end
-        else
-            plugin = Plugin.plugins[plugin_name]
+            plugin_name = plugin_names[plugin_number]
+        elseif not table.contains(plugin_names, plugin_name) then
+            SendError("[SM] Invalid plugin name: %s", plugin_name)
         end
+        plugin = Plugin.plugins[plugin_name]
     else
         SendError("[SM] Usage: sm plugins info <plugin name>")
     end
@@ -134,15 +130,17 @@ function SparkMod.Command_Plugins_Load(plugin_name)
 end
 
 function SparkMod.Command_Plugins_Refresh(plugin_name)
+    local plugin_names = Plugin.List()
+
     Plugin.UnloadAll()
     
     local loaded = 0
     
-    for i = 1, #SparkMod.config.plugins do
-        if Plugin.Load(SparkMod.config.plugins[i]) then --TODO: change to new loading logic
+    for i = 1, #plugin_names do
+        if Plugin.Load(plugin_names[i]) then
             loaded = loaded + 1
         else
-            SendReply("[SM] Plugin failed to load: %s", SparkMod.config.plugins[i])
+            SendReply("[SM] Plugin failed to load: %s", plugin_names[i])
         end
     end
 
@@ -265,7 +263,7 @@ function SparkMod.Command_Config(config_name, command, key, ...)
 
             if config_plugin then
                 SparkMod.SavePluginConfig(config_plugin)
-                config_plugin.FireEvent("ConfigValueChanged", first_index, plugin.config[first_index], first_index_old_value)
+                config_plugin.FireEvent("ConfigValueChanged", first_index, config[first_index], first_index_old_value)
             elseif value_was_set then
                 SparkMod.SaveConfig()
             end
