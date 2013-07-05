@@ -27,6 +27,7 @@ default_phrases = {
     ["Start Countdown"] = "%.1f seconds remaining until the game begins...",
     ["Already Started"] = "There is already a map vote running.",
     ["Not Started"]     = "There is currently no map vote running.",
+    ["No Map Given"]    = "You need to specify a number or partial map name.",
     ["Too Few Maps"]    = "*** Not enough maps in rotation for a vote.",
     ["Starting"]        = "*** Map voting will begin in %s seconds...",
     ["Instructions"]    = "*** You can vote for the map you want by typing vote <map>",
@@ -305,6 +306,10 @@ end
 function OnCommandVote(client, map)
     if not started then
         SendError("%t", "Not Started")
+    end
+
+    if not map then
+        SendError("%t", "No Map Given")
     end
 
     local map_name
