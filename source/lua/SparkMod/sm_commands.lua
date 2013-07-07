@@ -137,7 +137,10 @@ function SparkMod.Command_Plugins_Refresh(plugin_name)
     local loaded = 0
     
     for i = 1, #plugin_names do
-        if Plugin.Load(plugin_names[i]) then
+        -- Plugin may have already been loaded as a dependency
+        if Plugin.IsLoaded(plugin_names[i]) then
+            loaded = loaded + 1
+        elseif Plugin.Load(plugin_names[i]) then
             loaded = loaded + 1
         else
             SendReply("[SM] Plugin failed to load: %s", plugin_names[i])
