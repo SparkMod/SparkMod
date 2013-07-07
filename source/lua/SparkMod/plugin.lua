@@ -411,6 +411,10 @@ function Plugin.Load(plugin_name, was_requested, config_plugin_paths)
         Plugin.waiting_for_dependencies[plugin_name] = nil
     end
 
+    if Plugin.initialized[plugin_name] then
+        return true
+    end
+    
     return Plugin.Initialize(plugin)
 end
 
